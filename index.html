@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Romantis untuk Panii</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            background-color: #ffe4e1;
+        }
+        .game-container {
+            margin-top: 50px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .question {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #ff1493;
+        }
+        .answer {
+            padding: 12px;
+            font-size: 18px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #ff69b4;
+            border: none;
+            border-radius: 10px;
+            color: white;
+        }
+        .answer:hover {
+            background-color: #ff1493;
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        img {
+            width: 250px;
+            margin-top: 20px;
+            border-radius: 10px;
+            border: 3px solid #ff69b4;
+        }
+        #next-question {
+            margin-top: 15px;
+            padding: 10px;
+            font-size: 18px;
+            background-color: #ff4500;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        #next-question:hover {
+            background-color: #ff6347;
+        }
+    </style>
+</head>
+<body>
+    <h1>Game seru seruan buattt sayaanggnyaa akuuu 💖</h1>
+    <div class="game-container" id="game-container">
+        <div id="question" class="question"></div>
+        <img id="question-image" src="" style="display:none;">
+        <div id="answers"></div>
+        <p id="result"></p>
+        <button id="next-question" onclick="nextQuestion()" style="display:none;">Lanjut</button>
+    </div>
+    <p id="final-message" style="display:none; font-size: 20px; color: #ff1493; margin-top: 20px;"></p>
+    <div id="final-score" style="display:none; font-size: 18px; margin-top: 10px;"></div>
+    <div id="final-images" style="display:none;">
+        <img id="final-image1" src="" style="display:none; width: 300px; margin-top: 20px;">
+        <img id="final-image2" src="" style="display:none; width: 300px; margin-top: 20px;">
+        <img id="final-image3" src="" style="display:none; width: 300px; margin-top: 20px;">
+        <img id="final-image4" src="" style="display:none; width: 300px; margin-top: 20px;">
+    </div>
+    
+    <script>
+        const questions = [
+            { text: "Ke gunung mana akuu ambil bunga edelweis itu buat kamu?", answers: ["Cikuray", "Rinjani", "Merbabu", "Salak"], correct: "Cikuray" },
+            { text: "Kapan kita pertama kali jadian?", answers: ["1 Januari", "14 Februari", "19 Januari", "25 Desember"], correct: "19 Januari" },
+            { text: "Apa makanan yang pertama kita beli sayaang, yang ada di foto ini", image: "pani.jpg", answers: ["Sosis", "Molen pisang", "Kue cubit", "Air minum"], correct: "Kue cubit" },
+            { text: "Dimana kita beli air minum nya sayaang", answers: ["Indomaret", "Alfamidi", "Alfamaret", "Warung madura"], correct: "Alfamidi" },
+            { text: "Tempat kita berolahraga bareng dimana hayooo", answers: ["Milenium", "Foresthil", "Sentraland", "Jalan raya"], correct: "Milenium" },
+            { text: "Tempat kitaa ngobrol seru bareng dimanaa?", answers: ["Milenium", "Foresthil", "Sentraland", "Jalan raya"], correct: "Foresthil" },
+            { text: "Di foto ini kitaaa sedang ngapainn?", image: "nau.jpg", answers: ["Minum", "Makan", "Tidur", "Buat ganci"], correct: "Buat ganci" },
+            { text: "?", answers: ["Milenium", "Foresthil", "Sentraland", "Jalan raya"], correct: "Foresthil" },
+            { text: "Apaa laguu akuu yangg buatt kamuu?", answers: ["Perfect - Ed Sheeran", "Bukti - Virgoun", "Tak Ingin Usai - Keisya", "Berdua Saja - Payung Teduh"], correct: "Bukti - Virgoun" },
+            { text: "Akuu inii kuatt pedasss apaa tidakk?", answers: ["KUAT", "KUAT", "KUAT", "KUAT"], correct: "KUAT" }
+            
+        ];
+
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+
+        function loadQuestion() {
+            let gameContainer = document.getElementById("game-container");
+            gameContainer.style.opacity = "0";
+            setTimeout(() => {
+                let questionData = questions[currentQuestionIndex];
+                document.getElementById("question").innerText = questionData.text;
+                let answersDiv = document.getElementById("answers");
+                answersDiv.innerHTML = "";
+                document.getElementById("result").innerText = "";
+                document.getElementById("next-question").style.display = "none";
+                
+                if (questionData.image) {
+                    let imgElement = document.getElementById("question-image");
+                    imgElement.src = questionData.image;
+                    imgElement.style.display = "block";
+                } else {
+                    document.getElementById("question-image").style.display = "none";
+                }
+
+                questionData.answers.forEach(answer => {
+                    let button = document.createElement("button");
+                    button.className = "answer";
+                    button.innerText = answer;
+                    button.onclick = function () { checkAnswer(button, questionData.correct); };
+                    answersDiv.appendChild(button);
+                });
+                gameContainer.style.opacity = "1";
+            }, 500);
+        }
+
+        function checkAnswer(button, correctAnswer) {
+            let buttons = document.querySelectorAll(".answer");
+            buttons.forEach(btn => btn.classList.add("disabled"));
+            
+            if (button.innerText === correctAnswer) {
+                document.getElementById("result").innerText = "Benar! Kamu hebat sayang! 💕";
+                correctCount++;
+            } else {
+                document.getElementById("result").innerText = "Salah, sayang! Jawaban yang benar adalah " + correctAnswer + " 😘";
+                wrongCount++;
+            }
+            document.getElementById("next-question").style.display = "block";
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                document.getElementById("game-container").style.display = "none";
+                document.getElementById("final-message").innerText = "Game selesai! Makasih udah main, sayang! Kamu emang yang terbaik 💖";
+                document.getElementById("final-message").style.display = "block";
+                document.getElementById("final-score").innerText = `Skor akhir: ${correctCount} benar, ${wrongCount} salah`;
+                document.getElementById("final-score").style.display = "block";
+
+                let finalImages = ["ciah.jpg", "oyay.jpg", "ikk.jpg", "UHUY.jpg"];
+                finalImages.forEach((src, index) => {
+                    let imgElement = document.getElementById(`final-image${index + 1}`);
+                    imgElement.src = src;
+                    imgElement.style.display = "block";
+                });
+                document.getElementById("final-images").style.display = "block";
+            }
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
